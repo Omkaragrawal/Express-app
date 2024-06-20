@@ -1,17 +1,23 @@
 const express = require('express');
+const { join } = require('path');
+
 
 const app = express();
 
 const PORT = 8080;
 
-const middleWareWrapper = (callback) => 
+const middleWareWrapper = (callback) =>
     (request, response, next) => {
         Promise.resolve(callback(request, response, next)).catch((err) => next(err));
-};
+    };
 
 app.get('/', (req, res, next) => {
-    res.send('WELCOME TO TCET WORKSHOP!')
-  });
+    res.sendFile(join(__dirname, 'index.html'));
+});
+
+app.get('/front-end.js', (req, res, next) => {
+    res.sendFile(join(__dirname, 'front-end.js'));
+});
 
 app.get('/get-data', middleWareWrapper(async (req, res) => {
     const TEMP_DATA = await fetch('https://jsonplaceholder.typicode.com/albums');
@@ -29,21 +35,21 @@ app.get('/get-data', middleWareWrapper(async (req, res) => {
 
         PHOTOS_DATA.push(
             ...PICTURES_DATA.reduce((previousValue, currentValue, index) => {
-            if (index < 2) {
-                previousValue.push(currentValue);
-            }
-            return previousValue;
-        }, [])
-    );
+                if (index < 2) {
+                    previousValue.push(currentValue);
+                }
+                return previousValue;
+            }, [])
+        );
     }
 
-    res.json ({
+    res.json({
         albums: filteredAlbumData,
         photos: PHOTOS_DATA,
     });
 
 }));
 
-  app.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}`)
-  });
+});
